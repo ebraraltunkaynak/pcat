@@ -1,23 +1,30 @@
 const express = require('express');
+const path = require('path');
 
 const app = express();
-app.use(express.static('public'))
 
 
- app.get('/',(req,res) => {
-  
- const photo ={
-  id:1,
-  name:"photo name",
-  description:"photo photo",
-}
-res.send(photo)
- })
+// const myLogger =(req,res,next) =>{
+//   console.log("Mİddleware log 1");
+//   next();
+// }
+// const myLogger2 =(req,res,next) =>{
+//   console.log("Mİddleware log 2");
+//   next();
+// }
 
- 
 
-const port =3000;
+//MIDDLEWARES
+app.use(express.static('public'));
+// app.use(myLogger);
+// app.use(myLogger2);
 
-app.listen(port,() =>{
-  console.log( ` sunucu ${port} portunda baslatildi..`)
-})
+app.get('/', (req, res) => {
+   res.sendFile(path.resolve(__dirname, 'temp/index.html'))
+});
+
+const port = 3000;
+
+app.listen(port, () => {
+  console.log(` sunucu ${port} portunda baslatildi..`);
+});
