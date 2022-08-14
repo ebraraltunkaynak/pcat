@@ -6,7 +6,7 @@ const PhotoSchema = new Schema({
   title: String,
   description: String,
   image: String,
-  dataCreated: {
+  dateCreated: {
     type: Date,
     default: Date.now,
   },
