@@ -1,63 +1,60 @@
 const express = require('express');
-const mongoose=require('mongoose');
-const path = require('path');
+const mongoose = require('mongoose');
 const ejs = require('ejs');
-const Photo =require('./models/Photo');
-
+const path = require('path');
+const Photo = require('./models/Photo');
 
 const app = express();
 
-// connection database
-mongoose.connect('mongodb://localhost/pcat-test-db',{
+//connect to DB
+mongoose.connect('mongodb://localhost:27017/pcat-test-db', {
   useNewUrlParser: true,
-  useUnifiedTopology:true  
+  useUnifiedTopology: true,
 });
 
-//Template Engine
-app.set("view engine", "ejs");
+// TEMPLATE ENGINE
+app.set('view engine', 'ejs');
 
-
-// const myLogger =(req,res,next) =>{
-//   console.log("Mİddleware log 1");
-//   next();
-// }
-// const myLogger2 =(req,res,next) =>{
-//   console.log("Mİddleware log 2");
-//   next();
-// }
-
-//MIDDLEWARES
+// MIDDLEWARES
 app.use(express.static('public'));
-app.use(express.urlencoded({extended:true}))
-app.use(express.json())
-// app.use(myLogger);
-// app.use(myLogger2);
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
-//ROUTES
-
-app.get("/", async (req, res) => {
-  const photos=  await  Photo.find({})
+// ROUTES
+app.get('/', async (req, res) => {
+  //res.sendFile(path.resolve(__dirname, 'temp/index.html'))
+  const photos = await Photo.find({});
   res.render('index', {
-    photos
+    photos,
   });
 });
 
+app.get('/photos/:id', async (req, res) => {
+  //console.log(req.params.id)
+ // res.render('photo');
 
-app.get("/about", (req, res) => {
-  res.render('about');
+ const photo = await Photo.findById(req.params.id)
+ res.render('photo', {
+   photo
+ })
 });
 
-
-app.get("/add", (req, res) => {
+app.get('/about', (req, res) => {
+  //res.sendFile(path.resolve(__dirname, 'temp/index.html'))
+  res.render('about');
+});
+app.get('/add', (req, res) => {
+  //res.sendFile(path.resolve(__dirname, 'temp/index.html'))
   res.render('add');
 });
 
-app.post("/photos", async (req, res) => {
-  await  Photo.create(req.body)
-  res.redirect('/')
+app.post('/photos', async (req, res) => {
+  //res.sendFile(path.resolve(__dirname, 'temp/index.html'))
+  await Photo.create(req.body);
+  res.redirect('/');
 });
-const port = 3000;
 
+const port = 3000;
 app.listen(port, () => {
-  console.log(` sunucu ${port} portunda baslatildi..`);
+  console.log(`Sunucu ${port} portunda başlatıldı...`);
 });
