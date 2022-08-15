@@ -4,9 +4,10 @@ const methodOverride = require('method-override');
 
 const fileUpload = require('express-fileUpload');
 const ejs = require('ejs');
-const path = require('path');
-const fs = require('fs');
-const Photo = require('./models/Photo');
+
+
+const photoController = require('./controllers/photoControllers');
+const pageController = require('./controllers/pageControllers');
 
 const app = express();
 
@@ -27,86 +28,27 @@ app.use(express.json());
 app.use(fileUpload());
 app.use(
   methodOverride('_method', {
-    methods: ['POST', 'GET']
-  }));
+    methods: ['POST', 'GET'],
+  })
+);
 
 // ROUTES
-app.get('/', async (req, res) => {
-  //res.sendFile(path.resolve(__dirname, 'temp/index.html'))
-  const photos = await Photo.find({}).sort('-dateCreated');
-  res.render('index', {
-    photos,
-  });
-});
+app.get('/', photoController.getAllPhotos);
 
-app.get('/photos/:id', async (req, res) => {
-  //console.log(req.params.id)
-  // res.render('photo');
+app.get('/photos/:id', photoController.getPhoto);
+app.post('/photos', photoController.createPhoto);
 
-  const photo = await Photo.findById(req.params.id);
-  res.render('photo', {
-    photo,
-  });
-});
+app.put('/photos/:id', photoController.updatePhoto);
 
-app.get('/about', (req, res) => {
-  //res.sendFile(path.resolve(__dirname, 'temp/index.html'))
-  res.render('about');
-});
-app.get('/add', (req, res) => {
-  //res.sendFile(path.resolve(__dirname, 'temp/index.html'))
-  res.render('add');
-});
+app.delete('/photos/:id', photoController.deletePhoto);
 
-app.post('/photos', async (req, res) => {
-  //res.sendFile(path.resolve(__dirname, 'temp/index.html'))
-  // await Photo.create(req.body);
-  // res.redirect('/');
+// pages
 
-  const uploadDir = 'public/uploads';
+app.get('/about',pageController.getAboutPage );
 
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir);
-  }
+app.get('/add',pageController.getAddPage );
 
-  let uploadImage = req.files.image;
-  let uploadPath = __dirname + '/public/uploads/' + uploadImage.name;
-
-  uploadImage.mv(uploadPath, async () => {
-    await Photo.create({
-      ...req.body,
-      image: '/uploads/' + uploadImage.name,
-    });
-    res.redirect('/');
-  });
-});
-
-app.get('/photos/edit/:id', async (req, res) => {
-  const photo = await Photo.findOne({ _id: req.params.id });
-
-  res.render('edit', {
-    photo,
-  });
-});
-
-app.put('/photos/:id', async (req, res) => {
-  //res.sendFile(path.resolve(__dirname, 'temp/index.html'))
-  const photo = await Photo.findOne({ _id: req.params.id });
-  photo.title = req.body.title;
-  photo.description = req.body.description;
-  photo.save();
-
-  res.redirect(`/photos/${req.params.id}`);
-});
-
-
-app.delete('/photos/:id', async (req, res) => {
-  const photo = await Photo.findOne({ _id: req.params.id })
-  let deletedImage = __dirname + '/public' + photo.image
-  fs.unlinkSync(deletedImage)
-  await Photo.findByIdAndRemove(req.params.id)
-  res.redirect('/')
-})
+app.get('/photos/edit/:id',pageController.getEditPage );
 
 
 const port = 3000;
